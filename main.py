@@ -36,6 +36,18 @@ async def progress(ctx, *, task: str):
 
 @bot.command()
 async def appreview(ctx):
-    await ctx.send(f"🌟 Thank you `{ctx.author.display_name}` for the 5-star review! We truly appreciate your support. 💖")
+    discord_tag = f"{ctx.author.name}"
+    webhook_url = os.getenv("MAKE_WEBHOOK_URL")
+    payload = {
+        "username": discord_tag,
+        "command": "appreview"
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(webhook_url, json=payload) as response:
+            if response.status == 200:
+                await ctx.send(f"🌟 Thank you `{ctx.author.display_name}` for the 5-star review! We truly appreciate your support. 💖")
+            else:
+                await ctx.send(f"⚠️ Something went wrong while submitting your review. Please try again later.")
 
 bot.run(TOKEN)
