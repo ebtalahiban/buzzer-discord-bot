@@ -19,49 +19,25 @@ async def progress(ctx, category: str = "", status: str = ""):
     discord_tag = f"{ctx.author.name}"
     webhook_url = os.getenv("MAKE_WEBHOOK_URL")
 
-    category = category.lower().strip()
-    status = status.lower().strip()
-
-    valid_categories = ["10vids", "30vids"]
-
-    if category in valid_categories and status == "done":
+    if (category.lower().strip() == "10vids" or category.lower().strip() == "30vids") and status.lower().strip() == "done":
         payload = {
             "username": discord_tag,
-            "command": f"progress_{category}_done"
+            "command": f"progress_{category.lower().strip()}_done"
         }
 
         async with aiohttp.ClientSession() as session:
             async with session.post(webhook_url, json=payload) as response:
                 if response.status == 200:
-                    await ctx.send(f"✅ `{discord_tag}`, your **{category.replace('vids', ' videos')}** progress has been marked as **Done**!")
+                    await ctx.send(
+                        f"✅ `{discord_tag}`, your **{category}** progress has been marked as **Done**!\n\n"
+                        f"🔍 You can check the status of your task here:\n"
+                        f"https://docs.google.com/spreadsheets/d/1rUHybGMgBdDKRTAXnaANS65GKU1ksKHk75Qp23mEgCE/edit?usp=sharing\n\n"
+                        f"📝 It will first show **For Review**. If there are no issues, it will proceed to **Payment Processing**, then **Paid**.\n"
+                        f"💬 Also check the **Comments** column for any feedback about your content."
+                    )
                 else:
                     await ctx.send(f"⚠️ Something went wrong while updating your progress. Please try again later.")
     else:
-        await ctx.send(
-            "📌 Usage:\n"
-            "`!progress 10vids done` to mark your first 10 videos as done\n"
-            "`!progress 30vids done` to mark your 30 videos as done"
-        )
-
-@bot.command()
-async def appreview(ctx, *, task: str = ""):
-    discord_tag = f"{ctx.author.name}"
-
-    if task.lower().strip() == "done":
-        webhook_url = os.getenv("MAKE_WEBHOOK_URL")
-        payload = {
-            "username": discord_tag,
-            "command": "appreview"
-        }
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(webhook_url, json=payload) as response:
-                if response.status == 200:
-                    await ctx.send(f"🌟 Thank you `{ctx.author.display_name}` for the 5-star review! We’ve marked your review as **Done** in our system.")
-                else:
-                    await ctx.send(f"⚠️ Something went wrong while submitting your review. Please try again later.")
-    else:
-        await ctx.send(f"📌 `{ctx.author.display_name}`, please use the command like this: `!appreview done` to mark your review.")
-
+        await ctx.send(f"📌 Usage: `!progress 10vids done` or `!progress 30vids done` to mark your video task as completed.")
 
 bot.run(TOKEN)
