@@ -19,20 +19,29 @@ async def progress(ctx, category: str = "", status: str = ""):
     discord_tag = f"{ctx.author.name}"
     webhook_url = os.getenv("MAKE_WEBHOOK_URL")
 
-    if category.lower().strip() == "10vids" and status.lower().strip() == "done":
+    category = category.lower().strip()
+    status = status.lower().strip()
+
+    valid_categories = ["10vids", "30vids"]
+
+    if category in valid_categories and status == "done":
         payload = {
             "username": discord_tag,
-            "command": "progress_10vids_done"
+            "command": f"progress_{category}_done"
         }
 
         async with aiohttp.ClientSession() as session:
             async with session.post(webhook_url, json=payload) as response:
                 if response.status == 200:
-                    await ctx.send(f"✅ `{discord_tag}`, your **10 videos** progress has been marked as **Done**!")
+                    await ctx.send(f"✅ `{discord_tag}`, your **{category.replace('vids', ' videos')}** progress has been marked as **Done**!")
                 else:
                     await ctx.send(f"⚠️ Something went wrong while updating your progress. Please try again later.")
     else:
-        await ctx.send(f"📌 Usage: `!progress 10vids done` to mark your 10 video task as completed.")
+        await ctx.send(
+            "📌 Usage:\n"
+            "`!progress 10vids done` to mark your first 10 videos as done\n"
+            "`!progress 30vids done` to mark your 30 videos as done"
+        )
 
 @bot.command()
 async def appreview(ctx, *, task: str = ""):
