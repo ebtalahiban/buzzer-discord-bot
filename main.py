@@ -78,7 +78,7 @@ async def claim(ctx, task: str = "", buzzer_username: str = ""):
         return
 
     role_name = valid_tasks[task]
-    webhook_url = os.getenv("CLAIM_WEBHOOK_URL")  
+    webhook_url = os.getenv("MAKE_WEBHOOK_URL")
 
     payload = {
         "buzzer_username": buzzer_username,
