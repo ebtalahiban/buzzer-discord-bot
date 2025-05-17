@@ -62,4 +62,34 @@ async def progress(ctx, category: str = "", status: str = "", buzzer_username: s
     else:
         await ctx.send("📌 Usage: `!progress 10vids done buzzer_username` or `!progress 30vids done buzzer_username`")
 
+@bot.command()
+async def claim(ctx, collab_type: str = "", buzzer_username: str = ""):
+    discord_user = ctx.author
+    webhook_url = os.getenv("MAKE_VERIFY_BUZZER_WEBHOOK") 
+
+    if collab_type.lower() not in ["10collab", "30collab"]:
+        await ctx.send("📌 Usage: `!claim 10collab <buzzer_username>` or `!claim 30collab <buzzer_username>`")
+        return
+
+    payload = {
+        "buzzer_username": buzzer_username,
+        "collab_type": collab_type.lower()
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(webhook_url, json=payload) as response:
+            result = await response.json()
+
+            if response.status == 200 and result.get("valid"):
+                role_name = "$10-10vids-collab" if collab_type == "10collab" else "$30-30vids-collab"
+                role = discord.utils.get(ctx.guild.roles, name=role_name)
+
+                if role:
+                    await discord_user.add_roles(role)
+                    await discord_user.send(f"🎉 You’ve been added to the **{collab_type}** role. Welcome to the task!")
+                else:
+                    await ctx.send("⚠️ Role not found in the server.")
+            else:
+                await ctx.send(f"❌ `{buzzer_username}` not found in the {collab_type} list.")
+
 bot.run(TOKEN)
