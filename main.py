@@ -42,8 +42,9 @@ async def progress(ctx, category: str = "", status: str = "", buzzer_username: s
 
     webhook_url = os.getenv("MAKE_WEBHOOK_URL")
     payload = {
-        "buzzer_username": buzzer_username.strip(),
-        "command": f"progress_{category_mapped}_done"
+        "command": "progress",
+        "task": category_key,
+        "buzzer_username": buzzer_username.strip()
     }
 
     async with aiohttp.ClientSession() as session:
@@ -73,13 +74,12 @@ async def progress(ctx, category: str = "", status: str = "", buzzer_username: s
             else:
                 await ctx.send("⚠️ Something went wrong while updating your progress. Please try again later.")
 
-
 @bot.command()
 async def claim(ctx, task: str = "", buzzer_username: str = ""):
     user = ctx.author
     task = task.lower().strip()
     buzzer_username = buzzer_username.strip()
-    
+
     valid_tasks = {
         "10collab": "$10-10vids-collab",
         "30collab": "$30-30vids-collab"
@@ -93,8 +93,9 @@ async def claim(ctx, task: str = "", buzzer_username: str = ""):
     webhook_url = os.getenv("MAKE_WEBHOOK_URL")
 
     payload = {
-        "buzzer_username": buzzer_username,
-        "task": task
+        "command": "claim",
+        "task": task,
+        "buzzer_username": buzzer_username
     }
 
     async with aiohttp.ClientSession() as session:
@@ -110,7 +111,7 @@ async def claim(ctx, task: str = "", buzzer_username: str = ""):
                     else:
                         await ctx.send(f"❌ Role `{role_name}` not found.")
                 else:
-                    await ctx.send(f"❌ Buzzer username `{buzzer_username}` is not part of the $10 in 10 days collaborator list.")
+                    await ctx.send(f"❌ Buzzer username `{buzzer_username}` is not part of the {task} collaborator list.")
             else:
                 await ctx.send("⚠️ Something went wrong while verifying your Buzzer username. Please try again later.")
 
